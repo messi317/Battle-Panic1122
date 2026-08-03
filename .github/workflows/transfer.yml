@@ -1,0 +1,34 @@
+name: Transfer Files From Battle Panic
+on: workflow_dispatch
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Current Repo
+        uses: actions/checkout@v4
+
+      - name: Download and Extract Old Repo
+        run: |
+          # تنزيل ملفات المستودع السفلي وفك ضغطها
+          curl -L -o old_repo.zip https://github.com/messi317/Battle-Panic/archive/refs/heads/main.zip
+          unzip -o old_repo.zip
+          rm old_repo.zip
+
+          # نقل كافة الملفات إلى المستودع الحالي
+          cp -r Battle-Panic-main/* .
+          rm -rf Battle-Panic-main
+
+          # استثناء الملف الكبيـر project.fla حتى لا يرفض GitHub الرفع (قيد الـ 100MB)
+          find . -name "*.fla" -type f -delete
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Transfer all files from messi317/Battle-Panic" || echo "No changes to commit"
+          git push
+
