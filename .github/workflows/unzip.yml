@@ -1,0 +1,38 @@
+name: Unzip Source Files
+on: workflow_dispatch
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Install and Setup Git LFS
+        run: |
+          git lfs install
+          git lfs track "*.fla"
+          git lfs track "*.swf"
+
+      - name: Download and Unzip fla.zip and fla2.zip
+        run: |
+          curl -L -o fla.zip https://github.com/messi317/Battle-Panic/releases/download/1.0/fla.zip
+          unzip -o fla.zip -d fla_files/
+          rm fla.zip
+
+          curl -L -o fla2.zip https://github.com/messi317/Battle-Panic/releases/download/1.0/fla2.zip
+          unzip -o fla2.zip -d fla_files/
+          rm fla2.zip
+
+      - name: Commit and Push to Repository
+        run: |
+          git config --global user.name "messi317"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/messi317/Battle-Panic.git
+          git add .gitattributes
+          git add .
+          git commit -m "Add unzipped FLA files with Git LFS" || echo "No changes to commit"
+          git push origin main
+ 
