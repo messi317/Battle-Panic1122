@@ -1,0 +1,27 @@
+name: Unzip Uploaded Zip
+on: workflow_dispatch
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Unzip Battle-Panic-main
+        run: |
+          # فك ضغط الملف داخل المستودع
+          unzip -o "Battle-Panic-main (1).zip" -d extracted_files/
+          # حذف ملف الـ zip المضغوط بعد الفك لتنظيم المستودع
+          rm "Battle-Panic-main (1).zip"
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Unzipped Battle-Panic-main files" || echo "No changes to commit"
+          git push
+
